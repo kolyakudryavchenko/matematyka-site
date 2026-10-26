@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Для вчителя — Математика онлайн</title>
+<meta name="description" content="Методичні рекомендації щодо використання ресурсу на уроці, перелік візуалізацій за темами програми та інструкція зі створення посилання на конкретну вправу.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="vendor/katex/katex.min.css">
+<link rel="stylesheet" href="css/style.css">
+<script defer src="vendor/katex/katex.min.js"></script>
+<script defer src="vendor/katex/auto-render.min.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Перейти до основного вмісту</a>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="mark" aria-hidden="true">∑</span> Математика онлайн</a>
+    <nav class="nav" aria-label="Головна навігація">
+      <a href="index.html">Головна</a>
+      <a href="visuals.html">Візуалізації</a>
+      <a href="trainer.html">Тренажер</a>
+      <a href="progress.html">Мій прогрес</a>
+      <a href="teacher.html">Для вчителя</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+    <h1>Для вчителя</h1>
+
+    <section class="block">
+      <h2><span class="n">1</span> Використання на різних типах уроків</h2>
+      <div class="grid cols-2">
+        <div class="card">
+          <h3>Урок засвоєння нових знань</h3>
+          <p>Візуалізація показується через проєктор на етапі введення поняття. Роботу з моделлю обов’язково
+          супроводжуйте чітко сформульованим дослідницьким запитанням («що станеться з графіком, якщо…»)
+          і записом висновку в зошиті. Без запису спостереження швидко забувається.</p>
+        </div>
+        <div class="card">
+          <h3>Урок формування вмінь</h3>
+          <p>Тренувальні завдання базового рівня — для фронтальної роботи, середнього — для самостійної.
+          Параметрична генерація дає кожному учневі власний варіант, тому списування втрачає сенс.</p>
+        </div>
+        <div class="card">
+          <h3>Домашня робота</h3>
+          <p>Надішліть учням пряме посилання на тему або на конкретну візуалізацію. Попросіть надіслати
+          експортований звіт зі сторінки «Мій прогрес» — це дасть вам картину роботи без облікових записів.</p>
+        </div>
+        <div class="card">
+          <h3>Підготовка до контрольної</h3>
+          <p>Підсумковий тест теми (5 завдань без підказок) використовуйте як самоперевірку.
+          Не застосовуйте його результати для підсумкового оцінювання.</p>
+        </div>
+      </div>
+      <div class="theory" style="margin-top:14px">
+        <div class="note"><b>Важливо.</b> Результати тренувальних завдань мають функцію формувального
+        зворотного зв’язку. Якщо перетворити їх на оцінку, учень починає уникати складніших рівнів,
+        і дидактичний сенс триступеневої підказки зникає.</div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2><span class="n">2</span> Візуалізації та теми навчальної програми</h2>
+      <table class="data" id="map"></table>
+    </section>
+
+    <section class="block">
+      <h2><span class="n">3</span> Як надіслати учням посилання на конкретну вправу</h2>
+      <div class="theory">
+        <p>Усі сторінки ресурсу адресуються параметрами в рядку адреси, тому посилання можна скласти вручну
+        або просто скопіювати з рядка браузера, відкривши потрібну сторінку.</p>
+        <table class="data">
+          <tr><th>Що відкриється</th><th>Вигляд посилання</th></tr>
+          <tr><td>тема цілком (теорія, візуалізація, завдання, тест)</td><td><code>topic.html?t=<b>deriv10</b></code></td></tr>
+          <tr><td>лише візуалізація, на весь екран</td><td><code>visuals.html?v=<b>derivative</b></code></td></tr>
+          <tr><td>тренажер, одразу на потрібній темі</td><td><code>trainer.html?t=<b>deriv10</b></code></td></tr>
+          <tr><td>перелік тем класу</td><td><code>class.html?c=<b>10</b></code></td></tr>
+        </table>
+        <p>Ідентифікатори тем і візуалізацій наведено в таблиці нижче.</p>
+        <table class="data" id="ids"></table>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2><span class="n">4</span> Технічні умови</h2>
+      <div class="theory">
+        <ul>
+          <li>Ресурс працює в актуальних версіях Chrome, Firefox, Safari та Edge, на комп’ютері й на смартфоні
+          (мінімальна ширина екрана — 320 px).</li>
+          <li>Реєстрація не потрібна; персональні дані учнів не збираються й не передаються на сервер.</li>
+          <li>Прогрес зберігається в браузері конкретного пристрою. На іншому пристрої статистика буде порожньою —
+          це обмеження поточної версії.</li>
+          <li>Динамічні побудови GeoGebra підвантажуються із зовнішнього сервера, тому для них потрібне
+          інтернет-з’єднання; решта матеріалів працює й без нього.</li>
+        </ul>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="site-foot"><div class="wrap">Освітній вебресурс із математики.</div></footer>
+
+<script type="module">
+import { TOPICS, VIS_INFO } from './data/topics.js';
+import { el, $, markNav, renderMath, ready } from './js/core.js';
+
+ready(() => {
+  markNav();
+
+  const map = $('#map');
+  map.append(el('tr', {}, el('th', {}, 'Візуалізація'), el('th', {}, 'Клас і тема програми')));
+  Object.entries(VIS_INFO).forEach(([id, v]) => {
+    const used = TOPICS.filter((t) => t.vis.type === id);
+    map.append(el('tr', {},
+      el('td', {}, el('a', { href: `visuals.html?v=${id}` }, v.title)),
+      el('td', {}, used.map((t) => `${t.cls} кл. — ${t.program}`).join('; ') || '—')));
+  });
+
+  const ids = $('#ids');
+  ids.append(el('tr', {}, el('th', {}, 'Тема'), el('th', {}, 'Ідентифікатор теми'), el('th', {}, 'Ідентифікатор візуалізації')));
+  TOPICS.forEach((t) => ids.append(el('tr', {},
+    el('td', {}, `${t.cls} кл. — ${t.title}`),
+    el('td', {}, el('code', {}, t.id)),
+    el('td', {}, el('code', {}, t.vis.type)))));
+
+  renderMath();
+});
+</script>
+</body>
+</html>

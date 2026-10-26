@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тренажер — Математика онлайн</title>
+<meta name="description" content="Наскрізна практика із завданнями з різних тем курсу математики з автоматичною перевіркою та покроковими розв’язаннями.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="vendor/katex/katex.min.css">
+<link rel="stylesheet" href="css/style.css">
+<script defer src="vendor/katex/katex.min.js"></script>
+<script defer src="vendor/katex/auto-render.min.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Перейти до основного вмісту</a>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="mark" aria-hidden="true">∑</span> Математика онлайн</a>
+    <nav class="nav" aria-label="Головна навігація">
+      <a href="index.html">Головна</a>
+      <a href="visuals.html">Візуалізації</a>
+      <a href="trainer.html">Тренажер</a>
+      <a href="progress.html">Мій прогрес</a>
+      <a href="teacher.html">Для вчителя</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+    <h1>Тренажер</h1>
+    <p style="color:#566781;max-width:72ch">Наскрізна практика: завдання добираються з усіх тем, доданих на ресурс.
+    Оберіть тему або залиште «усі теми» — тоді завдання чергуватимуться.</p>
+
+    <div class="panel">
+      <div class="ctrl" style="grid-template-columns:120px 1fr;margin:0">
+        <label for="topic">Тема</label>
+        <select id="topic"></select>
+      </div>
+    </div>
+
+    <div id="host"></div>
+  </div>
+</main>
+
+<footer class="site-foot"><div class="wrap">Освітній вебресурс із математики.</div></footer>
+
+<script type="module">
+import { TOPICS, byId } from './data/topics.js';
+import { el, $, qs, markNav, renderMath, ready } from './js/core.js';
+import { mountPractice } from './js/practice.js';
+
+ready(() => {
+  markNav();
+  const sel = $('#topic');
+  sel.append(el('option', { value: 'all' }, 'усі теми'));
+  TOPICS.forEach((t) => sel.append(el('option', { value: t.id }, `${t.cls} кл. — ${t.title}`)));
+  if (qs('t')) sel.value = qs('t');
+
+  const mixed = () => {
+    const pool = { 1: [], 2: [], 3: [] };
+    TOPICS.forEach((t) => [1, 2, 3].forEach((l) => pool[l].push(...(t.gens[l] || []))));
+    return pool;
+  };
+
+  const render = () => {
+    const host = $('#host');
+    host.replaceChildren();
+    const id = sel.value;
+    if (id === 'all') mountPractice(host, { topicId: '__mixed__', gens: mixed() });
+    else { const t = byId(id); mountPractice(host, { topicId: t.id, gens: t.gens }); }
+    renderMath(host);
+  };
+
+  sel.addEventListener('change', render);
+  render();
+});
+</script>
+</body>
+</html>

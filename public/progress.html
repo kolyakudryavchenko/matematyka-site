@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Мій прогрес — Математика онлайн</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="vendor/katex/katex.min.css">
+<link rel="stylesheet" href="css/style.css">
+<script defer src="vendor/katex/katex.min.js"></script>
+<script defer src="vendor/katex/auto-render.min.js"></script>
+<script defer src="vendor/chart.umd.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Перейти до основного вмісту</a>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="mark" aria-hidden="true">∑</span> Математика онлайн</a>
+    <nav class="nav" aria-label="Головна навігація">
+      <a href="index.html">Головна</a>
+      <a href="visuals.html">Візуалізації</a>
+      <a href="trainer.html">Тренажер</a>
+      <a href="progress.html">Мій прогрес</a>
+      <a href="teacher.html">Для вчителя</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+    <h1>Мій прогрес</h1>
+    <p style="color:#566781;max-width:72ch">Результати зберігаються у вашому браузері (localStorage) і нікуди не
+    передаються. На іншому пристрої або після очищення даних браузера статистика буде порожньою.</p>
+
+    <div class="grid cols-3" id="stats"></div>
+
+    <section style="margin-top:24px">
+      <h2>Динаміка результатів</h2>
+      <div class="panel plain"><canvas id="dyn" style="max-height:280px" aria-label="Графік частки правильних відповідей"></canvas></div>
+    </section>
+
+    <section style="margin-top:24px">
+      <h2>За темами</h2>
+      <div id="byTopic"></div>
+    </section>
+
+    <section style="margin-top:24px">
+      <h2>Рекомендовані до повторення</h2>
+      <div id="weak"></div>
+    </section>
+
+    <div class="btn-row" style="margin-top:26px">
+      <button class="btn primary" type="button" id="exp">Експортувати звіт</button>
+      <button class="btn" type="button" id="clr">Очистити статистику</button>
+    </div>
+    <textarea id="report" rows="12" hidden style="width:100%;margin-top:14px;font:inherit;padding:12px;border:1px solid #d8e0ea;border-radius:10px"></textarea>
+  </div>
+</main>
+
+<footer class="site-foot"><div class="wrap">Освітній вебресурс із математики.</div></footer>
+
+<script type="module">
+import { TOPICS, byId } from './data/topics.js';
+import { el, $, markNav, renderMath, ready, load, pct, resetAll } from './js/core.js';
+
+ready(() => {
+  markNav();
+  const st = load();
+  const ids = Object.keys(st.topics).filter((id) => byId(id));
+
+  $('#stats').append(
+    el('div', { class: 'card stat' }, el('div', { class: 'v' }, String(st.totalTasks)), el('div', { class: 'k' }, 'виконано завдань')),
+    el('div', { class: 'card stat' }, el('div', { class: 'v' }, pct(st.totalRight, st.totalTasks) + ' %'), el('div', { class: 'k' }, 'правильних відповідей')),
+    el('div', { class: 'card stat' }, el('div', { class: 'v' }, String(st.points)), el('div', { class: 'k' }, 'балів')));
+
+  const box = $('#byTopic');
+  if (!ids.length) {
+    box.append(el('p', { class: 'empty' }, 'Поки що немає даних. Виконайте кілька завдань — і статистика з’явиться тут.'));
+  } else {
+    ids.forEach((id) => {
+      const t = byId(id), s = st.topics[id], p = pct(s.right, s.done);
+      box.append(el('div', { class: 'card', style: 'margin-bottom:10px' },
+        el('div', { style: 'display:flex;gap:8px;align-items:center;flex-wrap:wrap' },
+          el('b', {}, `${t.cls} кл. — ${t.title}`),
+          s.mastered ? el('span', { class: 'tag done' }, 'опановано') : null,
+          el('span', { style: 'margin-left:auto;color:#566781;font-size:.9rem' },
+            `${s.done} завдань · ${p} %` + (s.testBest != null ? ` · тест ${s.testBest} %` : ''))),
+        el('div', { class: 'bar' + (p >= 70 ? ' good' : p < 50 ? ' weak' : ''), style: 'margin-top:10px' },
+          el('i', { style: `width:${p}%` })),
+        el('p', { style: 'margin:8px 0 0' }, el('a', { href: `topic.html?t=${id}` }, 'перейти до теми'))));
+    });
+  }
+
+  const weakBox = $('#weak');
+  const weak = ids.map((id) => ({ id, p: pct(st.topics[id].right, st.topics[id].done), d: st.topics[id].done }))
+    .filter((x) => x.d >= 3 && x.p < 70).sort((a, b) => a.p - b.p);
+  if (!weak.length) weakBox.append(el('p', { class: 'empty' }, 'Тем із низьким відсотком правильних відповідей немає.'));
+  else weak.forEach((w) => {
+    const t = byId(w.id);
+    weakBox.append(el('a', { class: 'card', href: `topic.html?t=${w.id}`, style: 'margin-bottom:8px' },
+      el('b', {}, `${t.cls} кл. — ${t.title}`), el('p', {}, `правильних відповідей ${w.p} % — варто повторити`)));
+  });
+
+  /* динаміка: частка правильних відповідей у послідовних групах по 10 спроб */
+  const cv = $('#dyn');
+  const pts = [];
+  for (let i = 0; i < st.log.length; i += 10) {
+    const chunk = st.log.slice(i, i + 10);
+    pts.push(Math.round((chunk.reduce((a, b) => a + b.r, 0) / chunk.length) * 100));
+  }
+  if (window.Chart && pts.length) {
+    new window.Chart(cv, {
+      type: 'line',
+      data: { labels: pts.map((_, i) => `${i * 10 + 1}–${i * 10 + 10}`),
+        datasets: [{ label: '% правильних', data: pts, borderColor: '#1f5fa9', backgroundColor: 'rgba(31,95,169,.12)', fill: true, tension: .25 }] },
+      options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100 } }, plugins: { legend: { display: false } } },
+    });
+  } else {
+    cv.replaceWith(el('p', { class: 'empty' }, 'Діаграма з’явиться після виконання щонайменше десяти завдань.'));
+  }
+
+  $('#exp').addEventListener('click', () => {
+    const lines = [
+      'ЗВІТ ПРО РЕЗУЛЬТАТИ РОБОТИ З РЕСУРСОМ',
+      'Сформовано: ' + new Date().toLocaleString('uk-UA'),
+      '',
+      `Усього виконано завдань: ${st.totalTasks}`,
+      `Правильних відповідей: ${st.totalRight} (${pct(st.totalRight, st.totalTasks)} %)`,
+      `Набрано балів: ${st.points}`,
+      '',
+      'За темами:',
+      ...ids.map((id) => {
+        const t = byId(id), s = st.topics[id];
+        return `  ${t.cls} кл. ${t.title}: ${s.done} завдань, ${pct(s.right, s.done)} % правильних` +
+          (s.testBest != null ? `, тест ${s.testBest} %` : '') + (s.mastered ? ' [опановано]' : '');
+      }),
+    ];
+    const ta = $('#report');
+    ta.hidden = false;
+    ta.value = lines.join('\n');
+    ta.select();
+  });
+
+  $('#clr').addEventListener('click', () => {
+    if (confirm('Очистити всю збережену статистику? Дію не можна скасувати.')) { resetAll(); location.reload(); }
+  });
+
+  renderMath();
+});
+</script>
+</body>
+</html>

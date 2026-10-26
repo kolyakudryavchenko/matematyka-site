@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Математика онлайн — інтерактивний навчальний ресурс</title>
+<meta name="description" content="Безкоштовний україномовний ресурс для навчання математики у 5–11 класах: інтерактивні візуалізації, тренувальні завдання з автоматичною перевіркою та підсумкові тести.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="vendor/katex/katex.min.css">
+<link rel="stylesheet" href="css/style.css">
+<script defer src="vendor/katex/katex.min.js"></script>
+<script defer src="vendor/katex/auto-render.min.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Перейти до основного вмісту</a>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="mark" aria-hidden="true">∑</span> Математика онлайн</a>
+    <nav class="nav" aria-label="Головна навігація">
+      <a href="index.html">Головна</a>
+      <a href="visuals.html">Візуалізації</a>
+      <a href="trainer.html">Тренажер</a>
+      <a href="progress.html">Мій прогрес</a>
+      <a href="teacher.html">Для вчителя</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+    <section class="hero">
+      <h1>Інтерактивна математика для 5–11 класів</h1>
+      <p class="lead">Теорія, динамічні візуалізації та тренувальні завдання з автоматичною перевіркою.
+      Без реєстрації: прогрес зберігається у вашому браузері й нікуди не передається.</p>
+      <div class="btn-row">
+        <a class="btn primary" href="trainer.html">Почати тренування</a>
+        <a class="btn" href="visuals.html">Переглянути візуалізації</a>
+      </div>
+    </section>
+
+    <section class="panel">
+      <label for="q" style="font-weight:700;display:block;margin-bottom:6px">Пошук за темами</label>
+      <input type="text" id="q" placeholder="наприклад: похідна, парабола, ймовірність" style="width:min(460px,100%)"
+             aria-describedby="q-hint">
+      <p id="q-hint" style="margin:8px 0 0;color:#566781;font-size:.9rem">Почніть вводити назву теми — перелік нижче оновиться.</p>
+      <div id="found" style="margin-top:14px"></div>
+    </section>
+
+    <h2>Класи</h2>
+    <div class="grid cols-3" id="classes"></div>
+
+    <h2 style="margin-top:28px">Як влаштована сторінка теми</h2>
+    <div class="grid cols-2">
+      <div class="card"><h3>1. Теорія</h3><p>Означення, властивості й розібраний приклад. Формули відображаються засобами KaTeX і лишаються розбірливими на будь-якому екрані.</p></div>
+      <div class="card"><h3>2. Візуалізація</h3><p>Інтерактивна модель, параметрами якої ви керуєте самостійно: графік перебудовується в реальному часі.</p></div>
+      <div class="card"><h3>3. Тренувальні завдання</h3><p>Умови генеруються з випадковими параметрами, тому кожне проходження теми дає нові задачі. Три рівні складності.</p></div>
+      <div class="card"><h3>4. Підсумковий тест</h3><p>П’ять завдань без підказок. Результат від 75 % зараховується як опанування теми.</p></div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-foot"><div class="wrap">
+  Освітній вебресурс із математики. Матеріали узгоджено з чинною навчальною програмою для закладів загальної середньої освіти.
+</div></footer>
+
+<script type="module">
+import { TOPICS, CLASSES, byClass } from './data/topics.js';
+import { el, $, markNav, renderMath, ready, load, pct } from './js/core.js';
+
+ready(() => {
+  markNav();
+  const st = load();
+
+  const classes = $('#classes');
+  CLASSES.forEach((c) => {
+    const list = byClass(c);
+    const done = list.filter((t) => st.topics[t.id]?.mastered).length;
+    classes.append(el('a', { class: 'card', href: `class.html?c=${c}` },
+      el('span', { class: 'tag cls' }, `${c} клас`),
+      el('h3', { style: 'margin-top:8px' }, `${list.length} ${list.length === 1 ? 'тема' : 'теми'}`),
+      el('p', {}, list.map((t) => t.title).join(' · ')),
+      done ? el('p', { style: 'margin-top:8px' }, el('span', { class: 'tag done' }, `опановано: ${done}`)) : null));
+  });
+
+  const found = $('#found');
+  const show = (q) => {
+    const s = q.trim().toLowerCase();
+    if (!s) { found.replaceChildren(); return; }
+    const hits = TOPICS.filter((t) => (t.title + ' ' + t.short + ' ' + t.program).toLowerCase().includes(s));
+    found.replaceChildren(...(hits.length
+      ? hits.map((t) => el('a', { class: 'card', href: `topic.html?t=${t.id}`, style: 'margin-bottom:8px' },
+          el('span', { class: 'tag cls' }, `${t.cls} клас`), ' ',
+          el('span', { class: 'tag' }, t.subject),
+          el('h3', { style: 'margin-top:8px' }, t.title), el('p', {}, t.short)))
+      : [el('p', { style: 'color:#566781;margin:0' }, 'За цим запитом тем не знайдено.')]));
+  };
+  $('#q').addEventListener('input', (e) => show(e.target.value));
+
+  renderMath();
+});
+</script>
+</body>
+</html>
